@@ -1,0 +1,72 @@
+version: '3'
+services:
+ mongo:
+  image: mongo:3.4-jessie
+  ports: 
+   - 27017:27017
+  container_name: mongo_docker
+  network_mode: host
+  volumes:
+   - ./data/db:/data/db
+ eureka:
+  image: eurekaserver:1.0.1
+  build: SpringEurekaServer/
+  container_name: eurekaserver_docker
+  network_mode: host
+  restart : always
+  ports:
+   - 8761:8761
+  expose: 
+   - 8761
+ configserver:
+  image: configserver:1.0.0
+  build: ConfigServer/
+  container_name: configserver_docker
+  network_mode: host
+  restart: always
+  ports:
+   - 8088:8088
+  expose:
+   - 8088
+ user_app:
+  image: userapp:1.0.1
+  build: userservice/
+  container_name: userapp_docker
+  restart: always
+  network_mode: host
+  depends_on:
+   - mongo
+   - eureka
+   - configserver
+   - apigateway
+  ports:
+   - 8096:8096
+  expose:
+   - 8096
+ music_app:
+  image: musicapp:1.0.1
+  build: MusicApp/
+  container_name: musicapp_docker
+  restart: always
+  network_mode: host
+  depends_on:
+   - mongo
+   - eureka
+   - configserver
+   - apigateway
+  ports:
+   - 8098:8098
+  expose:
+   - 8098
+ apigateway:
+  image: apigateway:1.0.1
+  build: gateway/
+  container_name: apigateway_docker
+  restart: always
+  network_mode: host
+  depends_on:
+   - eureka
+  ports:
+   - 8092:8092
+  expose:
+   - 8092
